@@ -40,10 +40,11 @@ export default async function DocsPage({ params }: SlugProps) {
     const searchWord = "";
     const page = 1;
 
-    await queryClient.prefetchQuery({
-        queryKey: ["notes", searchWord, page, tag],
-        queryFn: () => fetchNotesServer(searchWord, page, tag as NoteTag | undefined),
-    })
+ await queryClient.prefetchQuery({
+    queryKey: ["notes", searchWord, page, tag],
+    queryFn: () => fetchNotesServer(searchWord, page, tag as NoteTag | undefined),
+})
+
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
