@@ -1,51 +1,50 @@
-"use client"
+"use client";
 
-import css from "./NotePreview.module.css"
-import { useQuery } from "@tanstack/react-query"
+import css from "./NotePreview.module.css";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Modal from "@/components/Modal/Modal";
 import { fetchNoteById } from "@/lib/api/clientApi";
 
+const NotePreview = () => {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const {
+    data: note,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
+    refetchOnMount: false,
+  });
 
-interface NotePreviewClientProps {
-    id: string;
-}
+  if (isLoading) {
+    return <p className={css.loading}>Loading, please wait...</p>;
+  }
 
-const NotePreviewClient = ({ id }: NotePreviewClientProps) => {
-    const router = useRouter();
+  if (error || !note) {
+    throw error;
+  }
 
-    const { data: note, isLoading, error } = useQuery({
-        queryKey: ["note", id],
-        queryFn: () => fetchNoteById(id),
-        refetchOnMount: false,
-    });
+  return (
+    <Modal onClose={() => router.back()}>
+      <div className={css.container}>
+        <div className={css.item}>
+          <div className={css.header}>
+            <h2>{note?.title}</h2>
+            <button onClick={() => router.back()} className={css.backBtn}>
+              Back
+            </button>
+          </div>
+          <p className={css.tag}>{note.tag}</p>
+          <p className={css.content}>{note?.content}</p>
+          <p className={css.date}>{note?.createdAt}</p>
+        </div>
+      </div>
+    </Modal>
+  );
+};
 
-    const handleClose = () => router.back();
-
-    if (isLoading) return <p>Loading, please wait...</p>;
-    if (error) return <p>Something went wrong.</p> ;
-    if (!note) return  <p>No note found</p>;
-    
-
-    return (
-        <Modal onClose={handleClose}>
-            <div className={css.container}>
-                <div className={css.item}>
-                    {" "}
-                    <button className={css.backBtn} onClick={handleClose}>
-                        Back
-                    </button>
-                    <div className={css.header}>
-                        <h2>{note.title}</h2>
-                    </div>
-                    <p className={css.tag}>{note.tag}</p>
-                    <p className={css.content}>{note.content}</p>
-                    <p className={css.date}>{note.createdAt}</p>
-                </div>
-            </div>
-        </Modal>
-    )
-
-}
-
-export default NotePreviewClient;
+export default NotePreview;

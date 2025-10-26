@@ -1,46 +1,31 @@
-"use client"
+"use client";
 
-import { useState } from "react";
 import css from "./TagsMenu.module.css"
-import { NoteTag } from "@/types/note";
+import { useState } from "react";
 import Link from "next/link";
+import { tags } from "@/constans/tags";
 
-const tags: NoteTag[] = ["Todo", "Work", "Personal", "Meeting", "Shopping", "Ideas", "Travel", "Finance", "Health", "Important"];
+
 
 const TagsMenu = () => {
+
     const [isOpen, setIsOpen] = useState(false);
- 
+    const toggle = () => setIsOpen(!isOpen);
 
     return (
         <div className={css.menuContainer}>
-            <button onClick={() => setIsOpen(!isOpen)} className={css.menuButton}>
+            <button onClick={toggle} className={css.menuButton}>
                 Notes ▾
             </button>
-            {isOpen && (
-                <ul className={css.menuList}>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/all`}
-                            className={css.menuLink}
-                            onClick={() => setIsOpen(!isOpen)}>
-                            All notes
-                        </Link>
+            {isOpen && (<ul className={css.menuList}>
+                {tags.map((element) => {
+                    return <li key={element} className={css.menuItem} onClick={toggle}>
+                        <Link className={css.menuLink} href={element === "All" ? "/notes/filter/All" : `/notes/filter/${element}`} >{element}</Link>
                     </li>
-
-                    {tags.map(tag => (
-                        <li key={tag} className={css.menuItem}>
-                            <Link
-                                href={`/notes/filter/${tag}`}
-                                className={css.menuLink}
-                                onClick={() => setIsOpen(!isOpen)}>
-                            {tag}
-                            </Link>
-                        </li>
-                   ))} 
-                </ul>
-            )}
-            
+                })}
+            </ul>)}
         </div>
+
     )
 }
 

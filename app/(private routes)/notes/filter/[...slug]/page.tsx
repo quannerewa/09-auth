@@ -1,50 +1,53 @@
-
-import NotesClient from "./Notes.client"
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import NoteDetails from "./Notes.client";
+import { NoteTag } from "@/types/note";
 import { Metadata } from "next";
-import { NotesResponse } from "@/types/note";
-import { fetchNotesServer } from "@/lib/api/serverApi";
+import fetchNotesServer from "@/lib/api/serverApi";
 
 
-interface NotesProps {
-    params: Promise<{ slug?: string[] }>;
+
+type SlugProps = {
+    params: Promise<{ slug: string[] }>;
 }
 
-export const generateMetadata = async ({params}: NotesProps): Promise<Metadata> => {
+export async function generateMetadata({ params }: SlugProps): Promise<Metadata> {
     const { slug } = await params;
-    const tag = slug?.[0] && slug[0].toLowerCase() !== "all" ? slug[0] : undefined;
-
+    const tag = slug[0] === "All" ? "All" : slug[0];
     return {
-        title: tag ? `Notes filtered by ${tag}` : "All notes",
-        description: tag ? `Browse notes filtered by the ${tag} tag.`
-            : "Browse all available notes without falters.",
+        title: tag ? `Notes tagged with ${tag}` : "All Notes",
+        description: tag ? `Notes filtered by tag: ${tag}` : "All Notes",
         openGraph: {
-            title: tag ? `Notes filtered by ${tag}` : "All notes",
-            description: tag ? `Browse notes filtered by the ${tag} tag.`
-                : "Browse all available notes without falters.",
-            url: `https://07-routing-nextjs-blond.vercel.app/notes/filter/${tag}`,
-            images: [
-                {
-                    url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-                    width: 1200,
-                    height: 630,
-                    alt: tag,
-                }
-            ]
+            title: tag ? `Notes tagged with ${tag}` : "All Notes",
+            description: tag ? `Notes filtered by tag: ${tag}` : "All Notes",
+            siteName: "NoteHub",
+            url: `https://youthoughts.versel.app/notes/filter/${slug[0]}`,
+            images: [{
+                url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+                width: 1200,
+                height: 630,
+                alt: `Notes tagged with ${tag}`,
+            }]
         }
     }
-
 }
 
-export default async function Notes({params}: NotesProps) {
+export default async function DocsPage({ params }: SlugProps) {
+    const queryClient = new QueryClient();
+
     const { slug } = await params;
-    const tag = slug?.[0] && slug[0].toLowerCase() !== "all" ? slug[0] : undefined;
+    const tag = slug[0] === "All" ? undefined : slug[0];
+    
+    const searchWord = "";
+    const page = 1;
 
+    await queryClient.prefetchQuery({
+        queryKey: ["notes", searchWord, page, tag],
+        queryFn: () => fetchNotesServer(searchWord, page, tag as NoteTag | undefined),
+    })
 
-    const initialPage = 1;
-    const initialQuery = "";
-
-    const initialData: NotesResponse = await fetchNotesServer({ page: initialPage, search: initialQuery, tag });
-
-
-    return <NotesClient initialData={initialData} tag={tag}/>
+    return (
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <NoteDetails tag={tag} />
+        </HydrationBoundary>
+    )
 }

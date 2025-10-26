@@ -1,12 +1,15 @@
-"use client"
+"use client";
 
-interface ErrorProps {
-    error: Error;
-}
+import css from "./error.module.css";
 
-export default function Error({ error }: ErrorProps) {
+type ErrorMessageProps = {
+  error: Error;
+};
 
-    return (
-        <p>Could not fetch the list of notes. {error.message}</p>
-    )
+export default function ErrorMessage({ error }: ErrorMessageProps) {
+  return (
+    <p className={css.text}>
+      Could not fetch the list of notes. {error.message}
+    </p>
+  );
 }
