@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import css from "../../layoutNotes.module.css";
+import css from "../filter/layoutNotes.module.css";
 interface NotesLayoutProps {
   children: ReactNode;
   sidebar: ReactNode;
