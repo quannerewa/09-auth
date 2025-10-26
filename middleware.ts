@@ -6,7 +6,7 @@ import { parse } from "cookie";
 const privateRoutes = ["/profile", "/notes"];
 const publicRoutes = ["/sign-in", "/sign-up"];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
@@ -58,3 +58,4 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 };
+
